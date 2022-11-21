@@ -1,6 +1,8 @@
 import {
-    assert, assertEquals, assertNotEquals, assertThrows, assertRejects, assertStrictEquals,
+    assert, assertEquals, assertNotEquals, assertThrows, assertRejects, assertStrictEquals, unreachable, unimplemented, fail, assertObjectMatch, assertNotInstanceOf, assertNotMatch, assertArrayIncludes,
 } from "https://deno.land/std/testing/asserts.ts";
+
+// Reference: https://deno.land/std/testing/asserts.ts
 
 Deno.test("successful asserts", () => {
     assert(true, "true is truthy");
@@ -19,7 +21,7 @@ Deno.test("successful asserts", () => {
 //     assert(false, new Error("This will fail with a custom error").stack);
 // });
 
-Deno.test("assert Equals", () => {
+Deno.test("assertEquals", () => {
     assertEquals("hello", "hello");
     assertEquals({ hello: "world" }, { hello: "world" });
 });
@@ -72,7 +74,7 @@ Deno.test("assertRejects with async function and custom error", async () => {
     );
 });
 
-Deno.test("assert strict equals", () => {
+Deno.test("assertStrictEquals", () => {
     assertStrictEquals("hello", "hello");
 });
 
@@ -100,17 +102,21 @@ Deno.test("assert string ends with", () => {
     assert("hello world".endsWith("world"));
 });
 
-Deno.test("assert Array contains", () => {
-    assert(["hello", "world"].includes("world"));
+Deno.test("assert Array includes", () => {
+    assertArrayIncludes([1, 2, 3], [2]);
 });
 
 Deno.test("assert Array not contains", () => {
-    assert(!["hello", "world"].includes("deno"));
+    assert(![1, 2, 3].includes(4));
 });
 
 // Regular expressions
 Deno.test("assert match (regular expressions)", () => {
     assert("hello world".match(/world/))
+});
+
+Deno.test("assertNotMatch", () => {
+    assertNotMatch("hello world", /deno/);
 });
 
 // Deno.test("assert file does not exist", async () => {
@@ -119,3 +125,82 @@ Deno.test("assert match (regular expressions)", () => {
 //     assert(!(await Deno.stat("test.txt")).isFile);
 // });
 
+Deno.test("unreachable code", () => {
+
+    function foo(x: number): number {
+        if (x === 1) {
+            return 1;
+        } else if (x === 2) {
+            return 2;
+        } else {
+            return unreachable();
+        }
+    }
+
+    foo(1);
+    foo(2);
+    // foo(3); // This will fail
+});
+
+Deno.test("unimplemented code is not ran", () => {
+
+    function foo(x: number): number {
+        if (x === 1) {
+            return 1;
+        } else if (x === 2) {
+            return 2;
+        } else {
+            return unimplemented("This else block is not implemented and should be used");
+        }
+    }
+
+    foo(1);
+    foo(2);
+    // foo(3); // This will trigger a failure
+});
+
+// Deno.test("force fail", () => {
+//     fail("This will fail");
+// });
+
+// Object match allows objects of different shapes to be compared
+// Whereas assertEquals will throw a ts error if the objects are not identical
+Deno.test("assertObjectMatch objects match", () => {
+    const obj1 = {
+        a: 1,
+        b: 2,
+        c: 3,
+    };
+    const obj2 = {
+        a: 1,
+        b: 2,
+        c: 3,
+        // d: 5, // This will trigger a failure
+    };
+    assertObjectMatch(obj1, obj2);
+});
+
+Deno.test("assertNotInstanceOf not an instance of", () => {
+    class Foo {
+        foo = "bar";
+    }
+    const foo = new Foo();
+    assertNotInstanceOf(foo, Array);
+});
+
+Deno.test("assertInstanceOf an instance of", () => {
+    class Foo {
+        foo = "bar";
+    }
+
+    class Bar extends Foo {
+        bar = "foo";
+    }
+
+    const foo = new Foo();
+    assert(foo instanceof Foo);
+
+    const bar = new Bar();
+    assert(bar instanceof Foo);
+
+});
