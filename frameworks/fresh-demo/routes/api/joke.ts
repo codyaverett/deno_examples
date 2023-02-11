@@ -12,6 +12,7 @@ const JOKES = [
   "My favourite computer based band is the Black IPs.",
   "What programme do you use to predict the music tastes of former US presidential candidates? An Al Gore Rhythm.",
   "An SEO expert walked into a bar, pub, inn, tavern, hostelry, public house.",
+  "I'm not a fan of Windows 10. I prefer Windows 7, 8 or even 9."
 ];
 
 export const handler = (_req: Request, _ctx: HandlerContext): Response => {
